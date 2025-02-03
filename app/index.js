@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView } from 'react-native';
 import { initializeApp } from '@firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from '@firebase/auth';
-
+import HomeScreen from './HomeScreen';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfNHDweBFakY466Xkd8h4Mb387pSEvagk",
@@ -53,6 +53,12 @@ const AuthenticatedScreen = ({ user, handleAuthentication }) => {
       <Text style={styles.title}>Welcome</Text>
       <Text style={styles.emailText}>{user.email}</Text>
       <Button title="Logout" onPress={handleAuthentication} color="#e74c3c" />
+      <View style={{ marginVertical: 15 }}></View>
+      <Button style
+        title="continue" 
+        onPress={() => navigation.navigate('HomeScreen')} 
+        color="#1A1A1A"  // Navigate to Details screen when button is pressed
+      />
     </View>
   );
 };
@@ -123,10 +129,11 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#1A1A1A',
   },
+   
   authContainer: {
     width: '80%',
     maxWidth: 400,
-    backgroundColor: '#ded9ee',
+    backgroundColor: '#ffff',
     padding: 16,
     borderRadius: 8,
     elevation: 3,
