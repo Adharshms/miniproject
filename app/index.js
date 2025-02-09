@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { initializeApp } from '@firebase/app';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from '@firebase/auth';
-import HomeScreen from './HomeScreen';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from '@firebase/auth';
+import SplashScreen from './SplashScreen';
+import HomeScreen from './screens/HomeScreen';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfNHDweBFakY466Xkd8h4Mb387pSEvagk",
@@ -12,160 +14,228 @@ const firebaseConfig = {
     messagingSenderId: "579472465047",
     appId: "1:579472465047:web:373a68c778afb72650ddd2",
     measurementId: "G-YZW27HDZ3G"
- 
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const Stack = createNativeStackNavigator();
 
-const AuthScreen = ({ email, setEmail, password, setPassword, isLogin, setIsLogin, handleAuthentication }) => {
-  return (
-    <View style={styles.authContainer}>
-       <Text style={styles.title}>{isLogin ? 'Sign In' : 'Sign Up'}</Text>
-
-       <TextInput
-        style={styles.input}
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Email"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Password"
-        secureTextEntry
-      />
-      <View style={styles.buttonContainer}>
-        <Button title={isLogin ? 'Sign In' : 'Sign Up'} onPress={handleAuthentication} color="#000000" />
-      </View>
-      <View style={styles.bottomContainer}>
-        <Text style={styles.toggleText} onPress={() => setIsLogin(!isLogin)}>
-          {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Sign In'}
-        </Text>
-      </View>
-    </View>
-  );
-}
-const AuthenticatedScreen = ({ user, handleAuthentication }) => {
-  return (
-    <View style={styles.authContainer}>
-      <Text style={styles.title}>Welcome</Text>
-      <Text style={styles.emailText}>{user.email}</Text>
-      <Button title="Logout" onPress={handleAuthentication} color="#e74c3c" />
-      <View style={{ marginVertical: 15 }}></View>
-      <Button style
-        title="continue" 
-        onPress={() => navigation.navigate('HomeScreen')} 
-        color="#1A1A1A"  // Navigate to Details screen when button is pressed
-      />
-    </View>
-  );
-};
-export default App = () => {
+const AuthScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [user, setUser] = useState(null); 
   const [isLogin, setIsLogin] = useState(true);
+  const [error, setError] = useState('');
 
-  const auth = getAuth(app);
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-    });
-
-    return () => unsubscribe();
-  }, [auth]);
-
-  
   const handleAuthentication = async () => {
+    setError('');
+    if (!email || !password) {
+      setError('Please fill in all fields');
+      return;
+    }
+    
     try {
-      if (user) {
-        
-        console.log('User logged out successfully!');
-        await signOut(auth);
+      if (isLogin) {
+        await signInWithEmailAndPassword(auth, email, password);
+        console.log('User signed in successfully!');
       } else {
-        // Sign in or sign up
-        if (isLogin) {
-          // Sign in
-          await signInWithEmailAndPassword(auth, email, password);
-          console.log('User signed in successfully!');
-        } else {
-       
-          await createUserWithEmailAndPassword(auth, email, password);
-          console.log('User created successfully!');
-        }
+        await createUserWithEmailAndPassword(auth, email, password);
+        console.log('User created successfully!');
       }
+      setEmail('');
+      setPassword('');
+      navigation.replace('Home');
     } catch (error) {
       console.error('Authentication error:', error.message);
+      setError(error.message.replace('Firebase: ', ''));
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {user ? (
-        
-        <AuthenticatedScreen user={user} handleAuthentication={handleAuthentication} />
-      ) : (
-        
-        <AuthScreen
-          email={email}
-          setEmail={setEmail}
-          password={password}
-          setPassword={setPassword}
-          isLogin={isLogin}
-          setIsLogin={setIsLogin}
-          handleAuthentication={handleAuthentication}
-        />
-      )}
-    </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardView}
+      >
+        <View style={styles.authContainer}>
+          <View style={styles.headerContainer}>
+            <Text style={styles.title}>XCROSS</Text>
+            <Text style={styles.subtitle}>{isLogin ? 'Welcome Back!' : 'Create Account'}</Text>
+          </View>
+
+          <View style={styles.formContainer}>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                setError('');
+              }}
+              placeholder="Email"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              placeholderTextColor="#94A3B8"
+            />
+
+            <TextInput
+              style={styles.input}
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                setError('');
+              }}
+              placeholder="Password"
+              secureTextEntry
+              placeholderTextColor="#94A3B8"
+            />
+
+            <TouchableOpacity 
+              style={styles.button}
+              onPress={handleAuthentication}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.buttonText}>
+                {isLogin ? 'Sign In' : 'Sign Up'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              onPress={() => {
+                setIsLogin(!isLogin);
+                setError('');
+                setEmail('');
+                setPassword('');
+              }}
+              style={styles.toggleContainer}
+            >
+              <Text style={styles.toggleText}>
+                {isLogin ? 'Need an account? Sign Up' : 'Already have an account? Sign In'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-}
+};
+
+const Navigation = () => {
+  const [initialRoute, setInitialRoute] = useState('Auth');
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setInitialRoute('Home');
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  return (
+    <Stack.Navigator 
+      initialRouteName={initialRoute}
+      screenOptions={{
+        headerShown: false,
+        animation: 'fade',
+      }}
+    >
+      <Stack.Screen name="Auth" component={AuthScreen} />
+      <Stack.Screen name="Home" component={HomeScreen} />
+    </Stack.Navigator>
+  );
+};
+
+const App = () => {
+  const [showSplash, setShowSplash] = useState(true);
+
+  const handleSplashFinish = () => {
+    setShowSplash(false);
+  };
+
+  if (showSplash) {
+    return <SplashScreen onFinish={handleSplashFinish} />;
+  }
+
+  return <Navigation />;
+};
+
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#1A1A1A',
+    flex: 1,
+    backgroundColor: '#F8FAFC',
   },
-   
+  keyboardView: {
+    flex: 1,
+  },
   authContainer: {
-    width: '80%',
-    maxWidth: 400,
-    backgroundColor: '#ffff',
-    padding: 16,
-    borderRadius: 8,
-    elevation: 3,
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+  },
+  headerContainer: {
+    alignItems: 'center',
+    marginBottom: 48,
   },
   title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: 'center',
+    fontSize: 40,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginBottom: 8,
+    letterSpacing: 3,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#64748B',
+    letterSpacing: 0.5,
+  },
+  formContainer: {
+    width: '100%',
+    maxWidth: 360,
+    alignSelf: 'center',
   },
   input: {
-    height: 50,
-    borderColor: ' #1A1A1A',
+    width: '100%',
+    height: 48,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    color: '#0F172A',
+    fontSize: 16,
+    marginBottom: 16,
     borderWidth: 1,
-    marginBottom: 16,
-    padding: 8,
-    borderRadius: 4,
+    borderColor: '#E2E8F0',
   },
-  buttonContainer: {
-    marginBottom: 16,
-    
+  button: {
+    backgroundColor: '#0F172A',
+    height: 48,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  toggleContainer: {
+    marginTop: 24,
+    alignItems: 'center',
   },
   toggleText: {
-    color: '#3498db',
+    color: '#64748B',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  errorText: {
+    color: '#EF4444',
     textAlign: 'center',
-  },
-  bottomContainer: {
-    marginTop: 20,
-  },
-  emailText: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginBottom: 20,
-    
-  },
+    marginBottom: 16,
+    fontSize: 14,
+  }
 });
+
+export default App;
