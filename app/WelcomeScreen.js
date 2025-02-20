@@ -8,7 +8,7 @@ const WelcomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Welcome!</Text>
+      <Text style={styles.welcomeText}>Welcome to XCROSS!</Text>
       <Text style={styles.emailText}>{userEmail}</Text>
       <Text style={styles.messageText}>Thank you for signing up.</Text>
     </View>
