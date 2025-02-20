@@ -59,7 +59,7 @@ const AuthScreen = ({ navigation }) => {
         <View style={styles.authContainer}>
           <View style={styles.headerContainer}>
             <Text style={styles.title}>XCROSS</Text>
-            <Text style={styles.subtitle}>{isLogin ? 'Welcome Back!' : 'Create Account'}</Text>
+            <Text style={styles.subtitle}>{isLogin ? 'Welcome Back zz!' : 'Create Account'}</Text>
           </View>
 
           <View style={styles.formContainer}>
