@@ -1,5 +1,8 @@
 {
   "expo": {
+
+    
+    "platforms": [ "android","web","android"],
     "plugins": [
       "expo-router",
       [

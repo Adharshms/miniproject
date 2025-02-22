@@ -5,6 +5,8 @@ import { initializeApp } from '@firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from '@firebase/auth';
 import SplashScreen from './SplashScreen';
 import HomeScreen from './screens/HomeScreen';
+import chat from './screens/chat';
+import ContactList from './screens/HomeScreen';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDfNHDweBFakY466Xkd8h4Mb387pSEvagk",
@@ -50,6 +52,7 @@ const AuthScreen = ({ navigation }) => {
     }
   };
 
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView 
@@ -59,7 +62,7 @@ const AuthScreen = ({ navigation }) => {
         <View style={styles.authContainer}>
           <View style={styles.headerContainer}>
             <Text style={styles.title}>XCROSS</Text>
-            <Text style={styles.subtitle}>{isLogin ? 'Welcome Back zz!' : 'Create Account'}</Text>
+            <Text style={styles.subtitle}>{isLogin ? 'Welcome' : 'Create Account'}</Text>
           </View>
 
           <View style={styles.formContainer}>
@@ -120,6 +123,8 @@ const AuthScreen = ({ navigation }) => {
   );
 };
 
+ 
+
 const Navigation = () => {
   const [initialRoute, setInitialRoute] = useState('Auth');
 
@@ -143,6 +148,10 @@ const Navigation = () => {
     >
       <Stack.Screen name="Auth" component={AuthScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Splash" component={SplashScreen} />
+      <Stack.Screen name="chat" component={chat} />
+      <Stack.Screen name="Contacts" component={ContactList} />
+
     </Stack.Navigator>
   );
 };
