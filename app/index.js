@@ -7,15 +7,18 @@ import SplashScreen from './SplashScreen';
 import HomeScreen from './screens/HomeScreen';
 import chat from './screens/chat';
 import ContactList from './screens/HomeScreen';
+import { sendPasswordResetEmail } from '@firebase/auth';
+import { Alert } from 'react-native';
+import ChangePasswordScreen from './screens/ChangePasswordScreen';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDfNHDweBFakY466Xkd8h4Mb387pSEvagk",
-    authDomain: "chatapp-2e7a7.firebaseapp.com",
-    projectId: "chatapp-2e7a7",
-    storageBucket: "chatapp-2e7a7.firebasestorage.app",
-    messagingSenderId: "579472465047",
-    appId: "1:579472465047:web:373a68c778afb72650ddd2",
-    measurementId: "G-YZW27HDZ3G"
+  apiKey: "AIzaSyDfNHDweBFakY466Xkd8h4Mb387pSEvagk",
+  authDomain: "chatapp-2e7a7.firebaseapp.com",
+  projectId: "chatapp-2e7a7",
+  storageBucket: "chatapp-2e7a7.firebasestorage.app",
+  messagingSenderId: "579472465047",
+  appId: "1:579472465047:web:373a68c778afb72650ddd2",
+  measurementId: "G-YZW27HDZ3G"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -34,7 +37,7 @@ const AuthScreen = ({ navigation }) => {
       setError('Please fill in all fields');
       return;
     }
-    
+
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
@@ -50,12 +53,26 @@ const AuthScreen = ({ navigation }) => {
       console.error('Authentication error:', error.message);
       setError(error.message.replace('Firebase: ', ''));
     }
-  };
 
+  };
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Enter your email to reset password');
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      Alert.alert('Password Reset', 'Check your email for the reset link.');
+      setEmail('');
+    } catch (error) {
+      setError(error.message.replace('Firebase: ', ''));
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
@@ -67,7 +84,7 @@ const AuthScreen = ({ navigation }) => {
 
           <View style={styles.formContainer}>
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
-            
+
             <TextInput
               style={styles.input}
               value={email}
@@ -92,8 +109,12 @@ const AuthScreen = ({ navigation }) => {
               secureTextEntry
               placeholderTextColor="#94A3B8"
             />
-
-            <TouchableOpacity 
+            {isLogin && (
+              <TouchableOpacity onPress={() => navigation.navigate('ChangePassword')} style={styles.forgotPasswordContainer}>
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
               style={styles.button}
               onPress={handleAuthentication}
               activeOpacity={0.7}
@@ -103,7 +124,7 @@ const AuthScreen = ({ navigation }) => {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => {
                 setIsLogin(!isLogin);
                 setError('');
@@ -121,9 +142,10 @@ const AuthScreen = ({ navigation }) => {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+
 };
 
- 
+
 
 const Navigation = () => {
   const [initialRoute, setInitialRoute] = useState('Auth');
@@ -139,7 +161,7 @@ const Navigation = () => {
   }, []);
 
   return (
-    <Stack.Navigator 
+    <Stack.Navigator
       initialRouteName={initialRoute}
       screenOptions={{
         headerShown: false,
@@ -151,6 +173,7 @@ const Navigation = () => {
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="chat" component={chat} />
       <Stack.Screen name="Contacts" component={ContactList} />
+      <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
 
     </Stack.Navigator>
   );
@@ -244,7 +267,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 16,
     fontSize: 14,
-  }
+  },
+  forgotPasswordContainer: {
+    alignItems: 'flex-end',
+    marginBottom: 10,
+  },
+  forgotPasswordText: {
+    color: '#64748B',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+
 });
 
 export default App;
