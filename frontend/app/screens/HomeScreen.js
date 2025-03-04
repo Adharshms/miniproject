@@ -66,7 +66,8 @@ export default function ContactList({ navigation }) {
       <TouchableOpacity
         key={_id}
         style={styles.userCard}
-        onPress={() => navigation.navigate('chat', { chatId: _id })}
+        // onPress={() => navigation.navigate('chat', { chatId: _id })}
+        onPress={() => navigation.navigate('chat', { chatId: _id, contactName: otherMember?.name })}
       >
         <Image
           source={{ uri: 'https://via.placeholder.com/60' }}
