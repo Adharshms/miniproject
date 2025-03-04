@@ -19,33 +19,49 @@ const AuthScreen = ({ navigation }) => {
 
   const handleAuth = async () => {
     if (!email || !password || (!isLogin && (!name || !language))) {
-      setError('Please fill all fields');
-      return;
+        setError('Please fill all fields');
+        return;
     }
 
-    const endpoint = isLogin ? 'http://192.168.24.204:5000/api/auth/login' : 'http://192.168.24.204:5000/api/auth/signup';
-    const userData = isLogin ? { email, password } : { name, email, password, language };
+    const endpoint = isLogin 
+        ? 'http://192.168.24.204:5000/api/auth/login' 
+        : 'http://192.168.24.204:5000/api/auth/signup';
+
+    const userData = isLogin 
+        ? { email, password } 
+        : { name, email, password, language };
 
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      });
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData),
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (data.success) {
-        await AsyncStorage.setItem('authToken', data.token); // Store token securely
-        Alert.alert('Success', data.message);
-        navigation.replace('Home');
-      } else {
-        setError(data.message);
-      }
+        if (response.ok) {
+            if (isLogin) {
+                // Only store token if logging in
+                await AsyncStorage.setItem('authToken', data.token);
+                Alert.alert('Success', 'Login successful!');
+                navigation.replace('Home'); // Go to home screen
+            } else {
+                // Signup successful, ask user to login
+                Alert.alert('Signup Successful', 'Please log in to continue.');
+                setIsLogin(true); // Switch to login mode
+                setEmail('');
+                setPassword('');
+                setName('');
+                setLanguage('');
+            }
+        } else {
+            setError(data.message || 'Something went wrong.');
+        }
     } catch (error) {
-      setError('Something went wrong. Please try again.');
+        setError('Something went wrong. Please try again.');
     }
-  };
+};
 
   return (
     <SafeAreaView style={styles.container}>
