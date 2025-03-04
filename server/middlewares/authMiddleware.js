@@ -1,26 +1,8 @@
-// const jwt=require("jsonwebtoken");
-// require("dotenv").config();
 
-// module.exports=(req,res,next)=>{
-//     try{
-//         const token=req.headers.authorization.split(" ")[1];
-
-//         const decodedToken=jwt.verify(token,process.env.SECRET_KEY);
-
-//         req.body.userId=decodedToken.userId;
-//         next();
-//     }catch(error){
-//         res.send({
-//             message:error.message,
-//             success:false
-//         })
-//     }
-// }
 const jwt = require('jsonwebtoken');
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   try {
-    console.log("🔹 Incoming Auth Header:", req.headers.authorization); // Debugging log
 
     if (!req.headers.authorization) {
       console.log("❌ No token found in headers!");
@@ -35,7 +17,7 @@ const authMiddleware = (req, res, next) => {
     }
 
     const verified = jwt.verify(token, process.env.SECRET_KEY);
-    console.log("✅ Token Verified, User ID:", verified.userId); // Debugging log
+    
 
     req.user = { userId: verified.userId }; // Attach user info to request
     next();

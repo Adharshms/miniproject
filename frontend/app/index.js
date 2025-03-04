@@ -6,8 +6,7 @@ import SplashScreen from './SplashScreen';
 import HomeScreen from './screens/HomeScreen';
 import chat from './screens/chat';
 import ContactList from './screens/HomeScreen';
-import ChangePasswordScreen from './screens/ChangePasswordScreen';
-
+import AddContactScreen from './screens/addContact';
 const Stack = createNativeStackNavigator();
 
 const AuthScreen = ({ navigation }) => {
@@ -102,7 +101,7 @@ function Navigation() {
       <Stack.Screen name='Splash' component={SplashScreen} />
       <Stack.Screen name='chat' component={chat} />
       <Stack.Screen name='Contacts' component={ContactList} />
-      <Stack.Screen name='ChangePassword' component={ChangePasswordScreen} />
+      <Stack.Screen name='AddContact' component={AddContactScreen} />
     </Stack.Navigator>
   );
 }
