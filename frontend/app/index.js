@@ -24,8 +24,8 @@ const AuthScreen = ({ navigation }) => {
     }
 
     const endpoint = isLogin 
-        ? 'http://192.168.24.204:5000/api/auth/login' 
-        : 'http://192.168.24.204:5000/api/auth/signup';
+        ? 'http://192.168.37.66:5000/api/auth/login' 
+        : 'http://192.168.37.66:5000/api/auth/signup';
 
     const userData = isLogin 
         ? { email, password } 
