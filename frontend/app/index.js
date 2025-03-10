@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -22,10 +23,16 @@ const AuthScreen = ({ navigation }) => {
         setError('Please fill all fields');
         return;
     }
+    const API_BASE_URL = Platform.OS === 'android' 
+    ? 'http://10.0.2.2:5000'  // For Android Emulator
+    : 'http://localhost:5000'; // For Web
+
+
+  
 
     const endpoint = isLogin 
-        ? 'http://192.168.24.204:5000/api/auth/login' 
-        : 'http://192.168.24.204:5000/api/auth/signup';
+    ? `${API_BASE_URL}/api/auth/login` 
+    : `${API_BASE_URL}/api/auth/signup`;
 
     const userData = isLogin 
         ? { email, password } 
