@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { Platform } from 'react-native';
 
 export default function ContactList({ navigation }) {
   const [searchText, setSearchText] = useState('');
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null); // Store logged-in user's ID
+
+  const API_BASE_URL = Platform.OS === 'android'
+    ? 'http://10.0.2.2:5000'  // For Android Emulator
+    : 'http://localhost:5000'; // For Web
 
   useFocusEffect(
     React.useCallback(() => {
@@ -25,7 +30,11 @@ export default function ContactList({ navigation }) {
           const payload = JSON.parse(atob(token.split('.')[1])); // Decode JWT
           setUserId(payload.userId);
 
+  final
+          const response = await fetch(`${API_BASE_URL}/api/chat/get-chat-of-user`, {
+ 
           const response = await fetch('http://192.168.37.66:5000/api/chat/get-chat-of-user', {
+    main
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

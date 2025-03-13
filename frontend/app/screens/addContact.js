@@ -21,7 +21,11 @@ export default function AddContactScreen({ navigation }) {
         return;
       }
 
+  final
+      const response = await fetch('http://192.168.160.11:5000/api/chat/create-new-chat', {
+ 
       const response = await fetch('http://192.168.37.66:5000/api/chat/create-new-chat', {
+  main
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
