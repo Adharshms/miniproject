@@ -30,7 +30,11 @@ export default function ContactList({ navigation }) {
           const payload = JSON.parse(atob(token.split('.')[1])); // Decode JWT
           setUserId(payload.userId);
 
+  final
           const response = await fetch(`${API_BASE_URL}/api/chat/get-chat-of-user`, {
+ 
+          const response = await fetch('http://192.168.37.66:5000/api/chat/get-chat-of-user', {
+    main
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

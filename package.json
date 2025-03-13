@@ -10,6 +10,7 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
+     "dev": "nodemon index.js",
     "server": "nodemon server.js"
   },
   "jest": {
@@ -17,7 +18,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
-    "@react-native-async-storage/async-storage": "^1.23.1",
+    "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-native-community/cli": "latest",
     "@react-native-firebase/app": "^21.11.0",
     "@react-native-firebase/auth": "^21.11.0",
@@ -63,6 +64,7 @@
     "jest-expo": "~52.0.5",
     "react-test-renderer": "18.3.1",
     "typescript": "^5.3.3"
+    
   },
   "private": true,
   "description": "This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).",
