@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-
+import { connectSocket, disconnectSocket } from "../services/socket";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SplashScreen from './SplashScreen';
 import HomeScreen from './screens/HomeScreen';
-import chat from './screens/chat';
+import chat from './screens/messageScreen';
 import ContactList from './screens/HomeScreen';
 import AddContactScreen from './screens/addContact';
 const Stack = createNativeStackNavigator();
@@ -20,55 +20,59 @@ const AuthScreen = ({ navigation }) => {
 
   const handleAuth = async () => {
     if (!email || !password || (!isLogin && (!name || !language))) {
-        setError('Please fill all fields');
-        return;
+      setError('Please fill all fields');
+      return;
     }
-    const API_BASE_URL = Platform.OS === 'android' 
-    ? 'http://10.0.2.2:5000'  // For Android Emulator
-    : 'http://localhost:5000'; // For Web
+    const API_BASE_URL = Platform.OS === 'android'
+      ? 'http://10.0.2.2:5000'  // For Android Emulator
+      : 'http://localhost:5000'; // For Web
 
 
-  
 
-    const endpoint = isLogin 
-    ? `${API_BASE_URL}/api/auth/login` 
-    : `${API_BASE_URL}/api/auth/signup`;
 
-    const userData = isLogin 
-        ? { email, password } 
-        : { name, email, password, language };
+    const endpoint = isLogin
+      ? `${API_BASE_URL}/api/auth/login`
+      : `${API_BASE_URL}/api/auth/signup`;
+
+    const userData = isLogin
+      ? { email, password }
+      : { name, email, password, language };
 
     try {
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(userData),
-        });
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      });
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (response.ok) {
-            if (isLogin) {
-                // Only store token if logging in
-                await AsyncStorage.setItem('authToken', data.token);
-                Alert.alert('Success', 'Login successful!');
-                navigation.replace('Home'); // Go to home screen
-            } else {
-                // Signup successful, ask user to login
-                Alert.alert('Signup Successful', 'Please log in to continue.');
-                setIsLogin(true); // Switch to login mode
-                setEmail('');
-                setPassword('');
-                setName('');
-                setLanguage('');
-            }
+      if (response.ok) {
+        if (isLogin) {
+          await AsyncStorage.setItem("authToken", data.token);
+          await AsyncStorage.setItem("userId", data.userId); // ✅ Store userId
+          localStorage.setItem("userId", data.userId); // ✅ Store userId for Web
+         
+          console.log(`🔹 User ID stored: ${data.userId}`);
+
+          connectSocket(); // ✅ Connect socket after storing userId
+          navigation.replace("Home");
         } else {
-            setError(data.message || 'Something went wrong.');
+          // Signup successful, ask user to login
+          Alert.alert('Signup Successful', 'Please log in to continue.');
+          setIsLogin(true); // Switch to login mode
+          setEmail('');
+          setPassword('');
+          setName('');
+          setLanguage('');
         }
+      } else {
+        setError(data.message || 'Something went wrong.');
+      }
     } catch (error) {
-        setError('Something went wrong. Please try again.');
+      setError('Something went wrong. Please try again.');
     }
-};
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -136,6 +140,13 @@ const App = () => {
     setShowSplash(false);
   };
 
+  useEffect(() => {
+    connectSocket(); // ✅ Connect when app starts
+
+    return () => {
+      disconnectSocket(); // ✅ Disconnect when app unmounts
+    };
+  }, []);
   if (showSplash) {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }

@@ -10,16 +10,22 @@ const chatmodel = mongoose.Schema({
             }
         ]
     },
+    messages: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Message",
+        },
+    ],
     latestmsg:
     {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Message"
     },
-    unreadMessageCount:{
-        type:Number,
-        default:0
+    unreadMessageCount: {
+        type: Number,
+        default: 0
     }
-    
+
 },
     {
         timestamps: true,

@@ -4,7 +4,7 @@ const cors = require('cors');
 const app=express();
 
 app.use(cors({
-    origin: 'http://localhost:8081', // Adjust if your frontend runs on a different port
+    origin: '*', // Adjust if your frontend runs on a different port
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: 'Content-Type,Authorization'
 }));

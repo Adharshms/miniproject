@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 export default function AddContactScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const API_BASE_URL = Platform.OS === 'android'
+      ? 'http://10.0.2.2:5000'  // For Android Emulator
+      : 'http://localhost:5000'; // For Web
 
   const handleAddContact = async () => {
     if (!email.trim()) {
@@ -21,7 +26,7 @@ export default function AddContactScreen({ navigation }) {
         return;
       }
 
-      const response = await fetch('http://192.168.160.11:5000/api/chat/create-new-chat', {
+      const response = await fetch(`${API_BASE_URL}/api/chat/create-new-chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
