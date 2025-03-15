@@ -23,54 +23,68 @@ const AuthScreen = ({ navigation }) => {
       setError('Please fill all fields');
       return;
     }
-    const API_BASE_URL = Platform.OS === 'android'
-      ? 'http://10.0.2.2:5000'  // For Android Emulator
-      : 'http://localhost:5000'; // For Web
-
-
-
-
-    const endpoint = isLogin
-      ? `${API_BASE_URL}/api/auth/login`
-      : `${API_BASE_URL}/api/auth/signup`;
-
-    const userData = isLogin
-      ? { email, password }
-      : { name, email, password, language };
 
     try {
+      const API_BASE_URL = Platform.OS === 'android'
+        ? 'http://10.0.2.2:5000'  // For Android Emulator
+        : 'http://localhost:5000'; // For Web
+
+      const endpoint = isLogin
+        ? `${API_BASE_URL}/api/auth/login`
+        : `${API_BASE_URL}/api/auth/signup`;
+
+      console.log(`🔄 Attempting ${isLogin ? 'login' : 'signup'} at: ${endpoint}`);
+      console.log('📝 Request data:', { ...{ email, password, name, language }, password: '****' });
+
+      const userData = isLogin
+        ? { email, password }
+        : { name, email, password, language };
+
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify(userData),
       });
 
+      console.log(`📡 Response status: ${response.status}`);
       const data = await response.json();
+      console.log('📦 Response data:', { ...data, token: data.token ? '****' : undefined });
 
       if (response.ok) {
         if (isLogin) {
           await AsyncStorage.setItem("authToken", data.token);
-          await AsyncStorage.setItem("userId", data.userId); // ✅ Store userId
-          localStorage.setItem("userId", data.userId); // ✅ Store userId for Web
-         
-          console.log(`🔹 User ID stored: ${data.userId}`);
-
-          connectSocket(); // ✅ Connect socket after storing userId
-          navigation.replace("Home");
+          await AsyncStorage.setItem("userId", data.userId);
+          
+          console.log(`✅ Login successful! User ID: ${data.userId}`);
+          
+          setTimeout(() => {
+            connectSocket(data.userId);
+            navigation.replace("Home");
+          }, 500);
         } else {
-          // Signup successful, ask user to login
-          Alert.alert('Signup Successful', 'Please log in to continue.');
-          setIsLogin(true); // Switch to login mode
-          setEmail('');
-          setPassword('');
-          setName('');
-          setLanguage('');
+          Alert.alert(
+            'Signup Successful', 
+            'Please log in to continue.',
+            [{ text: 'OK', onPress: () => {
+              setIsLogin(true);
+              setEmail('');
+              setPassword('');
+              setName('');
+              setLanguage('');
+            }}]
+          );
         }
       } else {
-        setError(data.message || 'Something went wrong.');
+        const errorMessage = data.message || 'Authentication failed. Please check your credentials.';
+        console.error('❌ Auth Error:', errorMessage);
+        setError(errorMessage);
       }
     } catch (error) {
-      setError('Something went wrong. Please try again.');
+      console.error('❌ Network Error:', error);
+      setError('Network error. Please check your connection and try again.');
     }
   };
 
@@ -140,13 +154,6 @@ const App = () => {
     setShowSplash(false);
   };
 
-  useEffect(() => {
-    connectSocket(); // ✅ Connect when app starts
-
-    return () => {
-      disconnectSocket(); // ✅ Disconnect when app unmounts
-    };
-  }, []);
   if (showSplash) {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }

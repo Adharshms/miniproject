@@ -20,10 +20,11 @@ const messagemodel = mongoose.Schema({
         type: String,
         required: true
     },
-    seen: {
-        type: Boolean,
-        default: false
-    }
+    status: {
+        type: String,
+        enum: ["sent", "delivered", "read"],
+        default: "sent"
+    },
 
 },
     {

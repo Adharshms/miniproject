@@ -24,5 +24,5 @@ const usermodel = mongoose.Schema({
     timestamps:true,
 });
 
-const User=mongoose.model("User",usermodel);
+const User = mongoose.models.User || mongoose.model("User",usermodel);
 module.exports=User

@@ -30,44 +30,43 @@ router.post("/signup", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    // 1. Check if user exists
-    const existuser = await User.findOne({ email: req.body.email });
-    if (!existuser) {
-      return res.send({
-        message: "User does not exist",
-        success: false
-      });
-    }
-    // 2. Check if password is provided and is correct
-    if (!req.body.password || !existuser.password) {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
       return res.status(400).send({
-        message: "Password missing or incorrect",
-        success: false
+        message: "Email and password are required",
+        success: false,
       });
     }
-    // 3. Validate Password
-    const isValid = await bcrypt.compare(req.body.password, existuser.password);
+
+    const existuser = await User.findOne({ email });
+    if (!existuser) {
+      return res.status(400).send({
+        message: "User does not exist",
+        success: false,
+      });
+    }
+
+    const isValid = await bcrypt.compare(password, existuser.password);
     if (!isValid) {
       return res.status(400).send({
         message: "Invalid password",
-        success: false
+        success: false,
       });
     }
-    // 4. Generate Token
+
     const token = jwt.sign({ userId: existuser._id }, process.env.SECRET_KEY, { expiresIn: "1d" });
 
-    res.status(201).send({
+    res.status(200).send({
       message: "User logged in successfully",
       success: true,
       token: token,
-      userId: existuser._id 
+      userId: existuser._id,
     });
   } catch (error) {
-    res.status(500).send({
-      message: error.message,
-      success: false
-    });
+    res.status(500).send({ message: error.message, success: false });
   }
 });
+
 
 module.exports = router;
